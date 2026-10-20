@@ -99,6 +99,6 @@ if(fromHash.length >= 16) connect(fromHash);
 else if(saved && saved.length >= 16) connect(saved);
 else {
   $('#gate').hidden = false; status('Modo local, sem sincronizar');
-  $('#gateForm').onsubmit = e => { e.preventDefault(); const c = $('#gateCode').value.trim(); if(c.length < 16){ $('#gateCode').value=''; $('#gateCode').placeholder='código incompleto'; return; } $('#gate').hidden = true; connect(c); };
+  $('#gateForm').onsubmit = e => { e.preventDefault(); const c = $('#gateCode').value.trim(); if(c.length < 16){ $('#gateCode').value=''; $('#gateCode').placeholder='código incompleto'; return; } $('#gate').hidden = true; if(!db) connect(c); };
   $('#gateLocal').onclick = () => { $('#gate').hidden = true; };
 }
