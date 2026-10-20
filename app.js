@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const ROS = window.ROS || [];
 const $ = s => document.querySelector(s);
@@ -84,7 +84,7 @@ function connect(code){
     const d = s.val();
     if(d && typeof d.idx === 'number' && d.idx !== cur){ cur = Math.min(d.idx, ROS.length-1); render(); if(d.by && d.by !== role) toast(d.by + ' avançou: ' + ROS[cur].n); }
   }, () => status('Código de acesso inválido', 'off'));
-  onValue(query(ref(db, `mesa/${sala}/chat`), orderByChild('at'), limitToLast(300)), s => {
+  onValue(query(ref(db, `mesa/${sala}/chat`), limitToLast(300)), s => {
     const list = []; s.forEach(c => { list.push(c.val()); });
     list.filter(m => m.at > lastSeen && m.role !== role).forEach(m => toast(m.role + ': ' + m.text));
     lastSeen = Math.max(lastSeen, ...list.map(m => m.at||0));
