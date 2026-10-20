@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Summit · Acompanhar ao vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="mesa.css">
+</head>
+<body class="viewer">
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Synvia Summit 2026 · 22.10 · Hilton Morumbi</span>
+      <h1>Acompanhar ao vivo</h1>
+    </div>
+    <div class="top-tools">
+      <span class="viewer-tag">Só visualização</span>
+      <span class="sync"><i class="dot" id="dot"></i><span id="sync">Conectando…</span></span>
+      <button class="icon-btn" id="themeBtn" title="Tema claro ou escuro" aria-label="Alternar tema">◐</button>
+      <time class="clock" id="clock">--:--:--</time>
+    </div>
+  </header>
+
+  <main class="live">
+    <article class="card now" id="cueNow" aria-live="polite"></article>
+    <div class="progress card" style="padding:14px 18px">
+      <div class="progress-top"><span id="progText">Deixa 1 de 1</span><span class="badge" id="drift" hidden></span></div>
+      <div class="bar"><i id="progFill"></i></div>
+    </div>
+    <article class="card next" id="cueNext"></article>
+    <div class="status-strip">
+      <div class="card"><span class="eyebrow">Datashow agora</span><b id="telaNow">Só o fundo</b></div>
+      <div class="card"><span class="eyebrow">Última mudança</span><b id="ultima">aguardando</b></div>
+    </div>
+  </main>
+
+  <section class="card timeline-card">
+    <header class="tl-head">
+      <h2>Roteiro do dia</h2>
+      <div class="seg filters" role="group" aria-label="Filtrar roteiro">
+        <button data-filter="all" aria-pressed="true">Tudo</button>
+        <button data-filter="video" aria-pressed="false">Vídeos</button>
+        <button data-filter="palco" aria-pressed="false">Palco</button>
+      </div>
+    </header>
+    <ol class="timeline" id="ros"></ol>
+  </section>
+</div>
+<script src="roteiro.js"></script>
+<script src="tela-lista.js"></script>
+<script src="config.js"></script>
+<script type="module" src="visualizar.js"></script>
+</body>
+</html>

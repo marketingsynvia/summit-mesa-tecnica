@@ -254,22 +254,43 @@ function recebeRoteiro(lista, by){
   else { const s = $('#edStatus'); s.textContent = (by || 'O outro operador') + ' salvou outro roteiro. Use "Descartar" para ver.'; s.className = 'edstatus warn'; }
 }
 
+/* ---------- link de visualização para o time ----------
+   O time abre visualizar.html com outro código, derivado deste por hash (não dá para voltar ao código da mesa).
+   As páginas da mesa copiam deixa, roteiro e datashow para ver/<código de visualização>. */
+let verCod = null; const ultimoEspelho = {};
+async function codigoVer(code){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('summit-ver:' + code));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('').slice(0, 24);
+}
+function espelha(chave, valor){
+  ultimoEspelho[chave] = valor;
+  if (!db || !verCod || valor == null) return;
+  set(ref(db, `ver/${verCod}/${chave}`), valor).catch(() => {});
+}
+function espelhaTudo(){ for (const k in ultimoEspelho) espelha(k, ultimoEspelho[k]); }
+document.addEventListener('click', e => {
+  if (!e.target.closest('#verCopy')) return;
+  const i = $('#verLink'); i.select();
+  (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast('Link de visualização copiado')).catch(() => { document.execCommand && document.execCommand('copy'); toast('Link de visualização copiado'); });
+});
+
 /* ---------- conexão ---------- */
 function connect(code){
   sala = code; store.set('mt-sala', code);
   if (location.hash.slice(1) !== code) history.replaceState(null, '', '#' + code);
   $('#telaLink').href = 'tela.html#' + code;
+  codigoVer(code).then(vc => { verCod = vc; const u = new URL('visualizar.html#' + vc, location.href).href; $('#verLink').value = u; espelhaTudo(); });
   const cfg = window.FIREBASE_CONFIG || {};
   if (!cfg.databaseURL) { status('Firebase não configurado', 'off'); return; }
   try { db = getDatabase(initializeApp(cfg)); } catch(e) { status('Erro ao iniciar a sincronização', 'off'); return; }
   onValue(ref(db, '.info/connected'), s => s.val() ? status('Sincronizado', 'on') : status('Sem conexão, segue funcionando', 'off'));
-  onValue(ref(db, `mesa/${sala}/ros`), s => { const d = s.val(); if (d && d.lista) { try { recebeRoteiro(JSON.parse(d.lista), d.by); } catch(e){} } }, () => {});
+  onValue(ref(db, `mesa/${sala}/ros`), s => { const d = s.val(); espelha('ros', d); if (d && d.lista) { try { recebeRoteiro(JSON.parse(d.lista), d.by); } catch(e){} } }, () => {});
   onValue(ref(db, `mesa/${sala}/now`), s => {
-    const d = s.val();
+    const d = s.val(); espelha('now', d);
     if (d && typeof d.idx === 'number' && d.idx !== cur) { cur = Math.min(d.idx, ROS.length - 1); aberto = -1; render(); if (primeiraDeixa === false && d.by && d.by !== role && ROS[cur]) toast(`${d.by} avançou: ${ROS[cur].n}`); }
     primeiraDeixa = false;
   }, () => status('Código de acesso inválido', 'off'));
-  onValue(ref(db, `mesa/${sala}/tela`), s => { const d = s.val() || {}; telaSt = { ov: d.ov || 'rot', rot: String(d.rot || '').split(',').filter(Boolean), seg: Number(d.seg) || 0 }; renderTela(); }, () => {});
+  onValue(ref(db, `mesa/${sala}/tela`), s => { espelha('tela', s.val()); const d = s.val() || {}; telaSt = { ov: d.ov || 'rot', rot: String(d.rot || '').split(',').filter(Boolean), seg: Number(d.seg) || 0 }; renderTela(); }, () => {});
 }
 
 render(); renderTela(); renderEditor(); marcaSujo(false); tick();

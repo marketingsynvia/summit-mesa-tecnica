@@ -24,6 +24,24 @@
           ".validate": false
         }
       }
+    },
+    "ver": {
+      "$v": {
+        ".read": "$v.length >= 16",
+        ".write": "$v.length >= 16",
+        "now": {
+          ".validate": "newData.hasChildren(['idx','by','at']) && newData.child('idx').isNumber() && newData.child('idx').val() >= 0 && newData.child('idx').val() < 100"
+        },
+        "ros": {
+          ".validate": "newData.hasChildren(['lista','at']) && newData.child('lista').isString() && newData.child('lista').val().length <= 30000"
+        },
+        "tela": {
+          ".validate": "newData.hasChildren(['ov','at']) && newData.child('ov').isString() && newData.child('ov').val().length <= 30 && newData.child('at').isNumber()"
+        },
+        "$outro": {
+          ".validate": false
+        }
+      }
     }
   }
 }

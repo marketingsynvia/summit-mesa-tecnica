@@ -198,3 +198,17 @@ kbd{font:600 11px var(--mono);border:1px solid var(--line-2);border-bottom-width
   .row{grid-template-columns:48px 18px minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* compartilhar com o time */
+.share{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.share h3{margin:0}
+.share-row{display:flex;gap:8px}
+.share-row input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:8px 10px;font:600 12px var(--mono);color:var(--muted)}
+/* página de visualização */
+body.viewer .viewer-tag{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line-2);border-radius:999px;padding:6px 12px}
+body.viewer .row{cursor:default}
+body.viewer .row:hover{background:transparent}
+body.viewer .row.cur:hover{background:color-mix(in srgb,var(--lime) 12%,transparent)}
+.status-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.status-strip .card{padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.status-strip b{font:700 15px var(--mono)}
