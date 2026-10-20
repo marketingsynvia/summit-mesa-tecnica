@@ -19,7 +19,7 @@ function cueHTML(c, tag){
   return `<span class="tag">${tag} · ${esc(c.t)}</span><h2>${esc(c.n)}</h2>
   <div class="chips"><span class="chip clip">Telão <b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio">Áudio <b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">ordem a confirmar</span>':''}</div>
   ${c.d?`<p>${esc(c.d)}</p>`:''}
-  ${c.narr && tag==='Agora'?`<div class="play"><button class="btn audio" data-play="${c.narr}">▶ Tocar aviso + narração ${c.narr}</button><div class="bar"><i id="bar"></i></div></div>`:''}`;
+  ${c.narr && tag==='Agora'?`<div class="play"><button class="btn audio" data-play="${c.narr}">▶ Tocar aviso + narração</button><div class="bar"><i id="bar"></i></div></div>`:''}`;
 }
 function render(){
   $('#cueNow').innerHTML = cueHTML(ROS[cur], 'Agora');
@@ -59,12 +59,9 @@ function toast(text){
 /* ---------- áudios do palco (tocam só neste computador) ---------- */
 const FILES = {
   aviso: 'audio/aviso.mp3',
-  '01': 'audio/narracao-01-inicio.mp3',
-  '02': 'audio/narracao-02-proximo-painel.mp3',
-  '03': 'audio/narracao-03-retorno-almoco.mp3',
   '04': 'audio/narracao-04-retorno-coffee.mp3'
 };
-const NOMES = { aviso:'Aviso sonoro', '01':'Narração 01 · Início do evento', '02':'Narração 02 · Próximo painel', '03':'Narração 03 · Retorno do almoço', '04':'Narração 04 · Retorno do coffee' };
+const NOMES = { aviso:'Aviso sonoro', '04':'Narração da Laís' };
 const players = {};
 for (const k in FILES) { const el = new Audio(FILES[k]); el.preload = 'auto'; players[k] = el; }
 let seqId = 0, playing = null;
