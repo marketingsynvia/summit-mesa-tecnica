@@ -104,16 +104,31 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') stopAudio();
 
 /* ---------- datashow (tela.html) ---------- */
 const TELA = window.TELA || [];
-let telaAtual = 'nenhum';
+let telaSt = { ov:'rot', rot:[], seg:0 };
+const tNome = id => (TELA.find(o => o.id === id) || {nome:id}).nome;
 function renderTela(){
-  $('#telaBoard').innerHTML = TELA.map((o,i)=>`<button data-tela="${o.id}" aria-pressed="${o.id===telaAtual}">${i} · ${esc(o.nome)}</button>`).join('');
-  const o = TELA.find(x => x.id === telaAtual); $('#telaNow').textContent = 'No ar: ' + (o ? o.nome : telaAtual);
+  const itens = TELA.filter(o => o.src);
+  $('#telaMix').innerHTML = itens.map(o => `<button data-mix="${o.id}" aria-pressed="${telaSt.rot.includes(o.id)}">${telaSt.rot.includes(o.id)?'✓ ':'+ '}${esc(o.nome)}</button>`).join('');
+  $('#telaDir').innerHTML = TELA.map((o,i) => `<button data-dir="${o.id}" class="${telaSt.ov===o.id?'live':''}">${i ? i+' · ' : ''}${esc(o.nome)}</button>`).join('');
+  $('#telaSeg').value = String(telaSt.seg);
+  $('#telaVolta').hidden = telaSt.ov === 'rot';
+  $('#telaNow').textContent = telaSt.ov !== 'rot' ? 'No ar, direto: ' + tNome(telaSt.ov) + ' (o mix está pausado)'
+    : telaSt.rot.length ? 'No ar, mix: ' + telaSt.rot.map(tNome).join(' · ') : 'No ar: só o fundo';
+}
+function enviaTela(p){
+  const st = { ...telaSt, ...p };
+  if (!db) { status('Modo local: o datashow só recebe comando com o código de acesso', 'off'); return; }
+  set(ref(db, `mesa/${sala}/tela`), { ov: st.ov, rot: st.rot.join(','), seg: st.seg, by: role, at: Date.now() })
+    .catch(() => status('O banco recusou o comando do datashow. Confira as regras do Firebase.', 'off'));
 }
 document.addEventListener('click', e => {
-  const b = e.target.closest('[data-tela]'); if (!b) return;
-  if (!db) { status('Modo local: o datashow só recebe comando com o código de acesso', 'off'); return; }
-  set(ref(db, `mesa/${sala}/tela`), {ov:b.dataset.tela, by:role, at:Date.now()}).catch(()=>status('O banco recusou o comando do datashow. Confira as regras do Firebase.', 'off'));
+  const m = e.target.closest('[data-mix]');
+  if (m) { const id = m.dataset.mix; const rot = telaSt.rot.includes(id) ? telaSt.rot.filter(x => x !== id) : TELA.filter(o => o.id === id || telaSt.rot.includes(o.id)).map(o => o.id); enviaTela({ rot }); return; }
+  const d = e.target.closest('[data-dir]');
+  if (d) { enviaTela({ ov: d.dataset.dir }); return; }
+  if (e.target.closest('#telaVolta')) enviaTela({ ov: 'rot' });
 });
+document.addEventListener('change', e => { if (e.target.id === 'telaSeg') enviaTela({ seg: Number(e.target.value) }); });
 renderTela();
 
 /* ---------- rádio ---------- */
@@ -152,7 +167,7 @@ function connect(code){
     lastSeen = Math.max(lastSeen, ...list.map(m => m.at||0));
     lastMsgs = list; renderMsgs(list);
   }, () => status('Rádio sem permissão. Confira o código.', 'off'));
-  onValue(ref(db, `mesa/${sala}/tela`), s => { const d = s.val(); telaAtual = (d && d.ov) || 'nenhum'; renderTela(); }, () => {});
+  onValue(ref(db, `mesa/${sala}/tela`), s => { const d = s.val() || {}; telaSt = { ov: d.ov || 'rot', rot: String(d.rot || '').split(',').filter(Boolean), seg: Number(d.seg) || 0 }; renderTela(); }, () => {});
   $('#telaLink').href = 'tela.html#' + sala;
 }
 

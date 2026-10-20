@@ -99,6 +99,10 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
 .board button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700}
 .board button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .panel>h3 a{color:var(--lime);text-transform:none;letter-spacing:0;font-weight:600}
+.sub{padding:12px 16px 0;font-size:12px;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sub select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+.board button.live{background:var(--crit);border-color:var(--crit);color:#fff}
+.board button.go{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .board button.stop{border-color:var(--crit);color:var(--crit)}
 .nowplaying{padding:0 16px 12px;font-size:12px;color:var(--muted);min-height:1.2em}
 @media (max-width:900px){.now,.main{grid-template-columns:1fr}.chat{height:60vh}}
@@ -153,8 +157,15 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
     </div>
     <div class="panel" id="telaPanel">
       <h3>Datashow <span><a id="telaLink" href="tela.html" target="_blank" rel="noopener">abrir a tela do datashow ↗</a></span></h3>
-      <div class="board" id="telaBoard"></div>
-      <div class="nowplaying" id="telaNow">No ar: Só o fundo</div>
+      <div class="sub">Mix · alternam sozinhas, com transição. Clique para incluir ou tirar.</div>
+      <div class="board" id="telaMix"></div>
+      <div class="sub">Tempo de cada tela no mix
+        <select id="telaSeg"><option value="0">vídeo inteiro</option><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option><option value="60">60 s</option></select>
+      </div>
+      <div class="sub">Direto · entra na hora, sem transição, e pausa o mix.</div>
+      <div class="board" id="telaDir"></div>
+      <div class="board"><button id="telaVolta" class="go" hidden>↺ Voltar ao mix</button></div>
+      <div class="nowplaying" id="telaNow">No ar: só o fundo</div>
     </div>
     </div>
     <div class="panel chat">
