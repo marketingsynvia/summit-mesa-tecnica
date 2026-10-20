@@ -18,7 +18,8 @@ function cueHTML(c, tag){
   if(!c) return `<span class="tag">${tag}</span><h2>Fim do roteiro</h2>`;
   return `<span class="tag">${tag} · ${esc(c.t)}</span><h2>${esc(c.n)}</h2>
   <div class="chips"><span class="chip clip">Telão <b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio">Áudio <b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">ordem a confirmar</span>':''}</div>
-  ${c.d?`<p>${esc(c.d)}</p>`:''}`;
+  ${c.d?`<p>${esc(c.d)}</p>`:''}
+  ${c.narr && tag==='Agora'?`<div class="play"><button class="btn audio" data-play="${c.narr}">▶ Tocar aviso + narração ${c.narr}</button><div class="bar"><i id="bar"></i></div></div>`:''}`;
 }
 function render(){
   $('#cueNow').innerHTML = cueHTML(ROS[cur], 'Agora');
@@ -53,6 +54,55 @@ function toast(text){
   let n = 0; clearInterval(blink); const base = 'Summit Mesa Técnica';
   blink = setInterval(()=>{ document.title = (n++%2) ? base : '● '+text; if(n>12){ clearInterval(blink); document.title = base; } }, 800);
 }
+
+
+/* ---------- áudios do palco (tocam só neste computador) ---------- */
+const FILES = {
+  aviso: 'audio/aviso.mp3',
+  '01': 'audio/narracao-01-inicio.mp3',
+  '02': 'audio/narracao-02-proximo-painel.mp3',
+  '03': 'audio/narracao-03-retorno-almoco.mp3',
+  '04': 'audio/narracao-04-retorno-coffee.mp3'
+};
+const NOMES = { aviso:'Aviso sonoro', '01':'Narração 01 · Início do evento', '02':'Narração 02 · Próximo painel', '03':'Narração 03 · Retorno do almoço', '04':'Narração 04 · Retorno do coffee' };
+const players = {};
+for (const k in FILES) { const el = new Audio(FILES[k]); el.preload = 'auto'; players[k] = el; }
+let seqId = 0, playing = null;
+function stopAudio(){
+  seqId++;
+  if (playing) { playing.pause(); playing.currentTime = 0; playing = null; }
+  $('#nowplaying').textContent = '';
+  const b = document.getElementById('bar'); if (b) b.style.width = '0';
+  document.querySelectorAll('[data-play]').forEach(x => x.setAttribute('aria-pressed','false'));
+}
+function playOne(key, id){
+  return new Promise(res => {
+    if (id !== seqId) return res(false);
+    const el = players[key]; playing = el; el.currentTime = 0;
+    $('#nowplaying').textContent = '▶ ' + NOMES[key];
+    el.ontimeupdate = () => { const b = document.getElementById('bar'); if (b && el.duration) b.style.width = (100 * el.currentTime / el.duration) + '%'; };
+    el.onended = () => res(true);
+    el.onerror = () => { $('#nowplaying').textContent = 'Não consegui tocar ' + NOMES[key]; res(false); };
+    el.play().catch(() => { $('#nowplaying').textContent = 'O navegador bloqueou o áudio. Clique de novo.'; res(false); });
+  });
+}
+async function playSeq(key, btn){
+  stopAudio(); const id = seqId;
+  if (btn) btn.setAttribute('aria-pressed','true');
+  const list = key === 'aviso' ? ['aviso'] : ['aviso', key];
+  if (db && key !== 'aviso') push(ref(db, `mesa/${sala}/chat`), {text:'Narração no ar: ' + NOMES[key], kind:'alert', role, at:Date.now()}).catch(()=>{});
+  for (let i = 0; i < list.length; i++) {
+    const ok = await playOne(list[i], id);
+    if (!ok || id !== seqId) return;
+    const b = document.getElementById('bar'); if (b && i < list.length - 1) b.style.width = '0';
+  }
+  if (id === seqId) { $('#nowplaying').textContent = 'Fim: ' + NOMES[key]; playing = null; if (btn) btn.setAttribute('aria-pressed','false'); }
+}
+document.addEventListener('click', e => {
+  const p = e.target.closest('[data-play]'); if (p) { playSeq(p.dataset.play, p); return; }
+  if (e.target.closest('[data-stop]')) stopAudio();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') stopAudio(); });
 
 /* ---------- rádio ---------- */
 function hhmm(ms){ return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}).format(new Date(ms)); }
