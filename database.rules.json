@@ -14,7 +14,12 @@
             ".validate": "newData.hasChildren(['text','role','at']) && newData.child('text').isString() && newData.child('text').val().length <= 500 && newData.child('role').isString() && newData.child('role').val().length <= 20"
           }
         },
-        "$outro": { ".validate": false }
+        "tela": {
+          ".validate": "newData.hasChildren(['ov','at']) && newData.child('ov').isString() && newData.child('ov').val().length <= 30 && newData.child('at').isNumber()"
+        },
+        "$outro": {
+          ".validate": false
+        }
       }
     }
   }

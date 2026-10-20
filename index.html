@@ -97,6 +97,8 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
 .bar i{display:block;height:100%;width:0;background:var(--warn);transition:width .2s linear}
 .board{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 .board button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700}
+.board button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.panel>h3 a{color:var(--lime);text-transform:none;letter-spacing:0;font-weight:600}
 .board button.stop{border-color:var(--crit);color:var(--crit)}
 .nowplaying{padding:0 16px 12px;font-size:12px;color:var(--muted);min-height:1.2em}
 @media (max-width:900px){.now,.main{grid-template-columns:1fr}.chat{height:60vh}}
@@ -149,6 +151,11 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
       </div>
       <div class="nowplaying" id="nowplaying"></div>
     </div>
+    <div class="panel" id="telaPanel">
+      <h3>Datashow <span><a id="telaLink" href="tela.html" target="_blank" rel="noopener">abrir a tela do datashow ↗</a></span></h3>
+      <div class="board" id="telaBoard"></div>
+      <div class="nowplaying" id="telaNow">No ar: Só o fundo</div>
+    </div>
     </div>
     <div class="panel chat">
       <h3>Rádio Carlos e Felipe <span id="who"></span></h3>
@@ -169,6 +176,7 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
 <div class="toast" id="toast" hidden></div>
 
 <script src="roteiro.js"></script>
+<script src="tela-lista.js"></script>
 <script src="config.js"></script>
 <script type="module" src="app.js"></script>
 </body>

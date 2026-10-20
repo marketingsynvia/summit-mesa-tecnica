@@ -101,6 +101,21 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') stopAudio(); });
 
+
+/* ---------- datashow (tela.html) ---------- */
+const TELA = window.TELA || [];
+let telaAtual = 'nenhum';
+function renderTela(){
+  $('#telaBoard').innerHTML = TELA.map((o,i)=>`<button data-tela="${o.id}" aria-pressed="${o.id===telaAtual}">${i} · ${esc(o.nome)}</button>`).join('');
+  const o = TELA.find(x => x.id === telaAtual); $('#telaNow').textContent = 'No ar: ' + (o ? o.nome : telaAtual);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tela]'); if (!b) return;
+  if (!db) { status('Modo local: o datashow só recebe comando com o código de acesso', 'off'); return; }
+  set(ref(db, `mesa/${sala}/tela`), {ov:b.dataset.tela, by:role, at:Date.now()}).catch(()=>status('O banco recusou o comando do datashow. Confira as regras do Firebase.', 'off'));
+});
+renderTela();
+
 /* ---------- rádio ---------- */
 function hhmm(ms){ return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}).format(new Date(ms)); }
 function renderMsgs(list){
@@ -137,6 +152,8 @@ function connect(code){
     lastSeen = Math.max(lastSeen, ...list.map(m => m.at||0));
     lastMsgs = list; renderMsgs(list);
   }, () => status('Rádio sem permissão. Confira o código.', 'off'));
+  onValue(ref(db, `mesa/${sala}/tela`), s => { const d = s.val(); telaAtual = (d && d.ov) || 'nenhum'; renderTela(); }, () => {});
+  $('#telaLink').href = 'tela.html#' + sala;
 }
 
 render(); renderMsgs([]);
