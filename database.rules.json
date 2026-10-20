@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "mesa": {
+      "$sala": {
+        ".read": "$sala.length >= 16",
+        ".write": "$sala.length >= 16",
+        "now": {
+          ".validate": "newData.hasChildren(['idx','by','at']) && newData.child('idx').isNumber() && newData.child('idx').val() >= 0 && newData.child('idx').val() < 100"
+        },
+        "chat": {
+          "$m": {
+            ".validate": "newData.hasChildren(['text','role','at']) && newData.child('text').isString() && newData.child('text').val().length <= 500 && newData.child('role').isString() && newData.child('role').val().length <= 20"
+          }
+        },
+        "$outro": { ".validate": false }
+      }
+    }
+  }
+}

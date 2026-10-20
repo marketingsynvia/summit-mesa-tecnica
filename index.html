@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Summit Mesa Técnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#0d1a14; --panel:#13241b; --line:#24382d; --fg:#eaf3ec; --muted:#93a99b;
+  --lime:#a6d63a; --green:#2f9a55; --warn:#f2b33d; --crit:#ef6b5b; --onlime:#0d1a14;
+  --display:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f3f6f1; --panel:#ffffff; --line:#d9e3d9; --fg:#12251a; --muted:#5d7365;
+  --lime:#5f9c12; --green:#1f7a42; --warn:#b57a07; --crit:#c2412f; --onlime:#ffffff; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f3f6f1; --panel:#ffffff; --line:#d9e3d9; --fg:#12251a; --muted:#5d7365;
+  --lime:#5f9c12; --green:#1f7a42; --warn:#b57a07; --crit:#c2412f; --onlime:#ffffff; color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:15px;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand small{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.brand h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.clock{font-family:var(--mono);font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+.roles{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px}
+.roles button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-weight:600;font-size:13px;color:var(--muted)}
+.roles button[aria-pressed="true"]{background:var(--lime);color:var(--onlime)}
+.now{display:grid;grid-template-columns:1.4fr 1fr;gap:12px}
+.cue{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cue.live{border-color:var(--lime);box-shadow:0 0 0 1px var(--lime) inset}
+.tag{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.cue.live .tag{color:var(--lime)}
+.cue h2{margin:0;font-size:26px;line-height:1.15;text-wrap:balance}
+.cue.next h2{font-size:19px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:4px 10px;display:inline-flex;gap:6px;align-items:center}
+.chip b{font-family:var(--mono);font-weight:600}
+.chip.clip{border-color:var(--green)}
+.chip.audio{border-color:var(--warn)}
+.chip.tbc{border-style:dashed;color:var(--warn)}
+.cue p{margin:0;color:var(--muted);line-height:1.5}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:transparent;border-radius:10px;padding:10px 14px;font-weight:700}
+.btn.go{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;min-width:0}
+.panel>h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px}
+.panel>h3 span{color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none}
+ol.ros{list-style:none;margin:0;padding:0;max-height:62vh;overflow:auto}
+ol.ros li{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+ol.ros li:hover{background:color-mix(in srgb,var(--lime) 6%,transparent)}
+ol.ros li.done{opacity:.5}
+ol.ros li.cur{background:color-mix(in srgb,var(--lime) 14%,transparent);box-shadow:3px 0 0 var(--lime) inset}
+ol.ros time{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
+ol.ros .t{font-weight:700;margin-bottom:6px}
+ol.ros .d{color:var(--muted);font-size:13px;line-height:1.45;margin-top:6px}
+.chat{display:flex;flex-direction:column;height:72vh;min-height:420px}
+.msgs{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,var(--fg) 7%,transparent);line-height:1.4;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:color-mix(in srgb,var(--lime) 22%,transparent)}
+.msg.alert{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent);font-weight:700}
+.msg .who{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;display:flex;gap:8px;justify-content:space-between}
+.empty{color:var(--muted);text-align:center;margin:auto;max-width:28ch;line-height:1.5}
+.quick{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-top:1px solid var(--line)}
+.quick button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700}
+.quick button.crit{border-color:var(--crit);color:var(--crit)}
+form.send{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--fg);font:inherit}
+.status{font-size:12px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--lime)} .dot.off{background:var(--crit)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--warn);color:#1a1205;font-weight:800;padding:14px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:min(92vw,560px);z-index:20}
+.gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
+.gate form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:12px;width:min(420px,100%)}
+.gate h2{margin:0;font-size:20px}
+.gate p{margin:0;color:var(--muted);line-height:1.5;font-size:14px}
+.gate input{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--fg);font:inherit;font-family:var(--mono)}
+@media (max-width:900px){.now,.main{grid-template-columns:1fr}.chat{height:60vh}}
+</style>
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <form id="gateForm">
+    <h2>Mesa técnica</h2>
+    <p>Cole o código de acesso que o Carlos mandou. Sem ele a página funciona só neste aparelho, sem sincronizar.</p>
+    <input id="gateCode" autocomplete="off" spellcheck="false" placeholder="código de acesso" aria-label="Código de acesso">
+    <button class="btn go" type="submit">Entrar</button>
+    <button class="btn" type="button" id="gateLocal">Usar sem sincronizar</button>
+  </form>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><small>Synvia Summit 2026 · 22.10 · Hilton Morumbi</small><h1>Mesa técnica</h1></div>
+    <div class="clock" id="clock" aria-live="off">--:--:--</div>
+    <div class="roles" role="group" aria-label="Quem está usando">
+      <button id="r-carlos" aria-pressed="true">Carlos · Resolume</button>
+      <button id="r-felipe" aria-pressed="false">Felipe · telas</button>
+    </div>
+  </header>
+
+  <section class="now">
+    <article class="cue live" id="cueNow"></article>
+    <article class="cue next" id="cueNext"></article>
+  </section>
+  <div class="ctrl">
+    <button class="btn" id="prev">← Voltar deixa</button>
+    <button class="btn go" id="next">Avançar para a próxima →</button>
+    <button class="btn" id="soundBtn">Ativar som dos avisos</button>
+    <span class="status"><i class="dot" id="dot"></i><span id="sync">Conectando…</span></span>
+  </div>
+
+  <section class="main">
+    <div class="panel">
+      <h3>Roteiro do dia <span>toque numa linha para marcar como "agora"</span></h3>
+      <ol class="ros" id="ros"></ol>
+    </div>
+    <div class="panel chat">
+      <h3>Rádio Carlos e Felipe <span id="who"></span></h3>
+      <div class="msgs" id="msgs"></div>
+      <div class="quick" id="quick">
+        <button data-q="Pronto aqui">Pronto aqui</button>
+        <button data-q="Segura, ainda não solta">Segura</button>
+        <button data-q="Faltam 5 minutos">Faltam 5 min</button>
+        <button data-q="Vídeo no ar">Vídeo no ar</button>
+        <button data-q="Palco ajustado, pode seguir">Palco ok</button>
+        <button data-q="Lembrar o restaurante: voltamos em 10 min">Restaurante 10 min</button>
+        <button class="crit" data-q="Problema no telão, me chama">Problema no telão</button>
+      </div>
+      <form class="send" id="send"><input id="txt" autocomplete="off" placeholder="Mensagem para o outro…" aria-label="Mensagem"><button class="btn go" type="submit">Enviar</button></form>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="roteiro.js"></script>
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
