@@ -28,8 +28,9 @@ setInterval(tick, 1000);
 /* ---------- tipo de cada deixa ---------- */
 const ehVideo = c => !!(c && c.video);
 const ehAudio = c => !!(c && c.narr);
+const ehTroca = c => !!(c && c.troca);
 function pills(c){
-  return `${ehVideo(c)?'<span class="pill video">▶ Vídeo</span>':''}${ehAudio(c)?'<span class="pill audio">Contagem + áudio</span>':''}${c.tbc?'<span class="pill tbc">a confirmar</span>':''}`;
+  return `${ehVideo(c)?'<span class="pill video">▶ Vídeo</span>':''}${ehAudio(c)?'<span class="pill audio">Contagem + áudio</span>':''}${ehTroca(c)?'<span class="pill troca">Troca de palco</span>':''}${c.tbc?'<span class="pill tbc">a confirmar</span>':''}`;
 }
 
 /* ---------- render ---------- */
@@ -37,7 +38,7 @@ function cardAgora(c){
   if (!c) return `<div class="cue-top"><span class="cue-label">Agora</span></div><h2>Roteiro vazio</h2>`;
   return `<div class="cue-top"><span class="cue-label">Agora</span><span class="cue-time">${esc(c.t)}</span>${pills(c)}</div>
     <h2>${esc(c.n)}</h2>
-    <dl class="facts"><dt>Telão</dt><dd>${esc(c.clip||'')}</dd>${c.audio?`<dt>Áudio</dt><dd>${esc(c.audio)}</dd>`:''}</dl>
+    <dl class="facts"><dt>Telão</dt><dd>${esc(c.clip||'')}</dd>${c.palco?`<dt>Palco</dt><dd>${esc(c.palco)}</dd>`:''}${c.mov?`<dt>Entra / sai</dt><dd>${esc(c.mov)}</dd>`:''}${c.audio?`<dt>Áudio</dt><dd>${esc(c.audio)}</dd>`:''}</dl>
     ${c.d?`<p class="desc">${esc(c.d)}</p>`:''}
     ${ehAudio(c)?`<div class="play-row"><button class="play-btn" data-play="${esc(c.narr)}" id="playMain">▶ Tocar aviso + narração</button><div class="bar"><i id="bar"></i></div></div>`:''}`;
 }
@@ -45,9 +46,9 @@ function cardProximo(c){
   if (!c) return `<div class="cue-top"><span class="cue-label">Próximo</span></div><h2>Fim do roteiro</h2><p class="desc">Depois desta deixa não há mais nada programado.</p>`;
   return `<div class="cue-top"><span class="cue-label">Próximo</span><span class="cue-time">${esc(c.t)}</span><span class="when" id="when" hidden></span></div>
     <h2>${esc(c.n)}</h2>
-    <dl class="facts"><dt>Telão</dt><dd>${esc(c.clip||'')}</dd></dl>
+    <dl class="facts"><dt>Telão</dt><dd>${esc(c.clip||'')}</dd>${c.palco?`<dt>Palco</dt><dd>${esc(c.palco)}</dd>`:''}${c.mov?`<dt>Entra / sai</dt><dd>${esc(c.mov)}</dd>`:''}</dl>
     ${c.d?`<p class="desc">${esc(c.d)}</p>`:''}
-    ${ehVideo(c)?'<div class="prep">● Deixe o vídeo pronto no Resolume</div>':ehAudio(c)?'<div class="prep" style="color:var(--amber)">● Contagem com aviso e narração da Laís</div>':''}`;
+    ${ehTroca(c)?`<div class="prep" style="color:var(--green-2)">● Staff: ${esc(c.mov||'troca de palco')}</div>`:ehVideo(c)?'<div class="prep">● Deixe o vídeo pronto no Resolume</div>':ehAudio(c)?'<div class="prep" style="color:var(--amber)">● Contagem com aviso e narração da Laís</div>':''}`;
 }
 function render(){
   cur = Math.max(0, Math.min(cur, ROS.length - 1));
@@ -63,9 +64,10 @@ function render(){
   ROS.forEach((r,i) => {
     const m = minutos(r.t), b = m === null ? '' : m < 12*60+30 ? 'Manhã' : m < 18*60 ? 'Tarde' : 'Noite';
     if (b && b !== bloco) { bloco = b; html += `<li class="block-title" aria-hidden="true">${b}</li>`; }
-    const cls = ['row', i<cur?'done':'', i===cur?'cur':'', i===aberto?'open':'', ehVideo(r)?'video':'', ehAudio(r)?'audio':''].join(' ');
+    const cls = ['row', i<cur?'done':'', i===cur?'cur':'', i===aberto?'open':'', ehVideo(r)?'video':'', ehAudio(r)?'audio':'', ehTroca(r)?'troca':''].join(' ');
     html += `<li class="${cls}" data-i="${i}"><time>${esc(r.t)}</time><span class="rail"><b></b></span>
-      <div class="body"><span class="t">${esc(r.n)}</span><span class="meta">${pills(r)}<span class="clip">${esc(r.clip||'')}</span></span>
+      <div class="body"><span class="t">${esc(r.n)}</span><span class="meta">${pills(r)}<span class="clip">${esc(r.clip||'')}</span>${r.palco?`<span class="clip">· ${esc(r.palco)}</span>`:''}</span>
+      ${r.mov?`<span class="mov">${esc(r.mov)}</span>`:''}
       ${r.d?`<span class="d">${esc(r.d)}</span>`:''}
       <button class="btn small ghost go" data-goto="${i}">Marcar como agora</button></div></li>`;
   });
@@ -78,7 +80,7 @@ function render(){
   tempoRel();
 }
 function aplicaFiltro(){
-  $$('#ros .row').forEach(li => { const r = ROS[+li.dataset.i]; li.classList.toggle('hide', filtro === 'video' ? !ehVideo(r) : filtro === 'audio' ? !ehAudio(r) : false); });
+  $$('#ros .row').forEach(li => { const r = ROS[+li.dataset.i]; li.classList.toggle('hide', filtro === 'video' ? !ehVideo(r) : filtro === 'audio' ? !ehAudio(r) : filtro === 'palco' ? !ehTroca(r) : false); });
   $$('#ros .block-title').forEach(b => b.hidden = filtro !== 'all');
 }
 // "em 5 min" no próximo e atraso em relação ao horário previsto
@@ -209,12 +211,13 @@ function renderEditor(){
     <div class="row2"><input data-f="clip" value="${esc(c.clip||'')}" aria-label="Telão" placeholder="telão">
       <label class="ck"><input type="checkbox" data-f="video" ${c.video?'checked':''}> vídeo</label>
       <label class="ck"><input type="checkbox" data-f="narr" ${c.narr?'checked':''}> áudio Laís</label></div>
+    <div class="row2b"><input data-f="palco" value="${esc(c.palco||'')}" aria-label="Palco" placeholder="palco (ex.: Púlpito + 4 cadeiras)"><input data-f="mov" value="${esc(c.mov||'')}" aria-label="Entra e sai" placeholder="entra / sai"><label class="ck"><input type="checkbox" data-f="troca" ${c.troca?'checked':''}> troca</label></div>
     <div class="row3"><input data-f="d" value="${esc(c.d||'')}" aria-label="Observação" placeholder="observação"></div>
   </li>`).join('');
 }
 $('#edList').addEventListener('input', e => {
   const li = e.target.closest('li'); if (!li) return; const c = rascunho[+li.dataset.k], f = e.target.dataset.f;
-  if (f === 'video') { if (e.target.checked) c.video = true; else delete c.video; }
+  if (f === 'video' || f === 'troca') { if (e.target.checked) c[f] = true; else delete c[f]; }
   else if (f === 'narr') { if (e.target.checked) { c.narr = '04'; c.audio = LAIS; } else { delete c.narr; if (c.audio === LAIS) delete c.audio; } }
   else c[f] = e.target.value;
   marcaSujo(true);

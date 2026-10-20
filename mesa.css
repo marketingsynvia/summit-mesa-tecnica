@@ -5,7 +5,7 @@
   --bg:#08110c; --surface:#0f1b14; --surface-2:#142319; --line:#203328; --line-2:#2b4335;
   --fg:#ecf4ee; --muted:#8ea596; --faint:#5f7667;
   --lime:#b4e14a; --on-lime:#0b150f; --green:#2f9a55;
-  --amber:#f3b43f; --on-amber:#1d1404; --red:#ef6a5a; --on-red:#ffffff;
+  --amber:#f3b43f; --green-2:#5fd38a; --on-amber:#1d1404; --red:#ef6a5a; --on-red:#ffffff;
   --display:'Manrope',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
   --r:16px; --r-sm:10px;
   color-scheme:dark;
@@ -14,7 +14,7 @@
   --bg:#eef2ec; --surface:#ffffff; --surface-2:#f5f8f3; --line:#dbe4da; --line-2:#c9d6c8;
   --fg:#10231a; --muted:#56705f; --faint:#8aa092;
   --lime:#4f8f12; --on-lime:#ffffff; --green:#1f7a42;
-  --amber:#b97a00; --on-amber:#ffffff; --red:#c63d2c;
+  --amber:#b97a00; --green-2:#1f8a4c; --on-amber:#ffffff; --red:#c63d2c;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -73,6 +73,10 @@ kbd{font:600 11px var(--mono);border:1px solid var(--line-2);border-bottom-width
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:4px 10px;border:1px solid var(--line-2);color:var(--muted)}
 .pill.video{background:var(--red);border-color:var(--red);color:var(--on-red)}
 .pill.audio{background:transparent;border-color:var(--amber);color:var(--amber)}
+.pill.troca{border-color:var(--green-2);color:var(--green-2)}
+.row.troca .rail b{border-color:var(--green-2);background:var(--green-2)}
+.row .mov{font-size:12px;font-weight:700;color:color-mix(in srgb,var(--fg) 70%,var(--bg))}
+.edlist .row2b{grid-column:2/-1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:8px;align-items:center}
 .pill.tbc{border-style:dashed;color:var(--amber);border-color:var(--amber)}
 .play-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:auto}
 .play-btn{border:0;background:var(--amber);color:var(--on-amber);border-radius:var(--r-sm);padding:14px 20px;font-weight:800;font-size:16px;display:inline-flex;align-items:center;gap:10px}
