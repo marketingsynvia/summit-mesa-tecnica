@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const ROS = window.ROS || [];
+let ROS = JSON.parse(JSON.stringify(window.ROS || []));
 const $ = s => document.querySelector(s);
 let cur = 0, role = 'Carlos', soundOn = false, lastSeen = Date.now(), lastMsgs = [];
 let db = null, sala = null;
@@ -131,6 +131,65 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => { if (e.target.id === 'telaSeg') enviaTela({ seg: Number(e.target.value) }); });
 renderTela();
 
+
+/* ---------- editor do roteiro (fica na aba de ensaio) ---------- */
+const ORIGINAL = JSON.parse(JSON.stringify(window.ROS || []));
+let rascunho = JSON.parse(JSON.stringify(ROS)), sujo = false, arrastando = null;
+const LAIS = 'Aviso + narração da Laís';
+function marcaSujo(v){ sujo = v; $('#edStatus').textContent = v ? 'Alterações ainda não salvas' : 'Igual ao roteiro em uso'; $('#edStatus').className = 'edstatus' + (v ? ' warn' : ''); }
+function renderEditor(){
+  $('#edList').innerHTML = rascunho.map((c,k)=>`<li draggable="true" data-k="${k}">
+    <span class="grip" title="Arraste para mudar a ordem">⋮⋮</span>
+    <input class="t" data-f="t" value="${esc(c.t)}" aria-label="Horário" maxlength="5">
+    <input class="n" data-f="n" value="${esc(c.n)}" aria-label="Deixa">
+    <input class="c" data-f="clip" value="${esc(c.clip)}" aria-label="Telão">
+    <label class="ck"><input type="checkbox" data-f="video" ${c.video?'checked':''}> vídeo</label>
+    <label class="ck"><input type="checkbox" data-f="narr" ${c.narr?'checked':''}> áudio Laís</label>
+    <input class="d" data-f="d" value="${esc(c.d||'')}" aria-label="Observação" placeholder="observação">
+    <span class="mv"><button data-mv="-1" title="Subir">↑</button><button data-mv="1" title="Descer">↓</button><button data-rm title="Apagar">✕</button></span>
+  </li>`).join('');
+}
+$('#edList').addEventListener('input', e => {
+  const li = e.target.closest('li'); if(!li) return; const c = rascunho[+li.dataset.k], f = e.target.dataset.f;
+  if (f === 'video') { if (e.target.checked) c.video = true; else delete c.video; }
+  else if (f === 'narr') { if (e.target.checked) { c.narr = '04'; c.audio = LAIS; } else { delete c.narr; if (c.audio === LAIS) delete c.audio; } }
+  else c[f] = e.target.value;
+  marcaSujo(true);
+});
+$('#edList').addEventListener('click', e => {
+  const li = e.target.closest('li'); if(!li) return; const k = +li.dataset.k;
+  const mv = e.target.closest('[data-mv]');
+  if (mv) { const j = k + Number(mv.dataset.mv); if (j < 0 || j >= rascunho.length) return; [rascunho[k], rascunho[j]] = [rascunho[j], rascunho[k]]; renderEditor(); marcaSujo(true); }
+  if (e.target.closest('[data-rm]')) { if (!confirmaApagar(k)) return; rascunho.splice(k,1); renderEditor(); marcaSujo(true); }
+});
+function confirmaApagar(k){ const b = document.querySelector(`#edList li[data-k="${k}"] [data-rm]`); if (b.dataset.ok) return true; b.dataset.ok = 1; b.textContent = 'apagar?'; setTimeout(()=>{ if (b.isConnected) { delete b.dataset.ok; b.textContent = '✕'; } }, 2500); return false; }
+$('#edList').addEventListener('dragstart', e => { const li = e.target.closest('li'); if (li) { arrastando = +li.dataset.k; li.classList.add('drag'); } });
+$('#edList').addEventListener('dragend', e => { document.querySelectorAll('#edList li').forEach(l => l.classList.remove('drag','over')); });
+$('#edList').addEventListener('dragover', e => { const li = e.target.closest('li'); if (!li || arrastando === null) return; e.preventDefault(); document.querySelectorAll('#edList li').forEach(l => l.classList.toggle('over', l === li)); });
+$('#edList').addEventListener('drop', e => { const li = e.target.closest('li'); if (!li || arrastando === null) return; e.preventDefault(); const to = +li.dataset.k; const [item] = rascunho.splice(arrastando,1); rascunho.splice(to,0,item); arrastando = null; renderEditor(); marcaSujo(true); });
+$('#edAdd').onclick = () => { rascunho.splice(Math.min(cur+1, rascunho.length), 0, {t:(ROS[cur]||{}).t||'00:00', n:'Nova deixa', clip:'01 Summit loop', d:''}); renderEditor(); marcaSujo(true); };
+$('#edSort').onclick = () => { rascunho = rascunho.map((c,i)=>[c,i]).sort((x,y)=> (x[0].t||'').localeCompare(y[0].t||'') || x[1]-y[1]).map(x=>x[0]); renderEditor(); marcaSujo(true); };
+$('#edUndo').onclick = () => { rascunho = JSON.parse(JSON.stringify(ROS)); renderEditor(); marcaSujo(false); };
+$('#edOrig').onclick = () => { rascunho = JSON.parse(JSON.stringify(ORIGINAL)); renderEditor(); marcaSujo(true); };
+$('#edSave').onclick = () => {
+  const lista = rascunho.filter(c => (c.n||'').trim()).map(c => ({...c, t:(c.t||'').trim(), n:c.n.trim()}));
+  const atual = ROS[cur]; ROS = lista; const j = atual ? ROS.findIndex(c => c.n === atual.n && c.t === atual.t) : -1;
+  rascunho = JSON.parse(JSON.stringify(ROS)); marcaSujo(false); renderEditor();
+  if (j >= 0) cur = j; cur = Math.min(cur, ROS.length-1); render();
+  if (db) { set(ref(db, `mesa/${sala}/ros`), {lista: JSON.stringify(lista), by: role, at: Date.now()}).then(()=>{ if (j >= 0) setCur(j); }).catch(()=>status('O banco recusou o roteiro. Confira as regras do Firebase.', 'off')); }
+  else status('Modo local: o roteiro mudou só neste computador', 'off');
+};
+function recebeRoteiro(lista, by){
+  ROS = lista; cur = Math.min(cur, ROS.length-1); render();
+  if (!sujo) { rascunho = JSON.parse(JSON.stringify(ROS)); renderEditor(); marcaSujo(false); }
+  else $('#edStatus').textContent = (by||'O outro') + ' salvou um roteiro novo. Clique em "Descartar" para ver.';
+}
+renderEditor(); marcaSujo(false);
+
+// aba de ensaio lembra se ficou aberta
+try { if (localStorage.getItem('mt-ensaio') === '1') $('#ensaio').open = true; } catch(e){}
+$('#ensaio').addEventListener('toggle', () => { try { localStorage.setItem('mt-ensaio', $('#ensaio').open ? '1' : '0'); } catch(e){} });
+
 /* ---------- rádio ---------- */
 function hhmm(ms){ return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'}).format(new Date(ms)); }
 function renderMsgs(list){
@@ -157,6 +216,7 @@ function connect(code){
     db = getDatabase(initializeApp(cfg));
   } catch(e){ status('Erro ao iniciar o Firebase', 'off'); return; }
   onValue(ref(db, '.info/connected'), s => s.val() ? status('Sincronizado com o outro operador', 'on') : status('Sem conexão. Continua funcionando e sincroniza quando voltar.', 'off'));
+  onValue(ref(db, `mesa/${sala}/ros`), s => { const d = s.val(); if (d && d.lista) { try { recebeRoteiro(JSON.parse(d.lista), d.by); } catch(e){} } }, () => {});
   onValue(ref(db, `mesa/${sala}/now`), s => {
     const d = s.val();
     if(d && typeof d.idx === 'number' && d.idx !== cur){ cur = Math.min(d.idx, ROS.length-1); render(); if(d.by && d.by !== role) toast(d.by + ' avançou: ' + ROS[cur].n); }

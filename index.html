@@ -99,6 +99,25 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
 .board button{border:1px solid var(--line);background:transparent;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700}
 .board button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .panel>h3 a{color:var(--lime);text-transform:none;letter-spacing:0;font-weight:600}
+details.drawer>summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;display:flex;justify-content:space-between;gap:8px;align-items:center}
+details.drawer>summary::-webkit-details-marker{display:none}
+details.drawer>summary::after{content:'▸';font-size:14px;transition:transform .2s}
+details.drawer[open]>summary::after{transform:rotate(90deg)}
+details.drawer>summary span{color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none;margin-left:auto}
+.sec{border-top:1px solid var(--line)}
+.sec>h3{margin:0;padding:14px 16px 0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sec>h3 span{color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none}
+.sec>h3 a{color:var(--lime);text-transform:none;letter-spacing:0;font-weight:600}
+.edlist{list-style:none;margin:8px 0 0;padding:0 16px;max-height:50vh;overflow:auto}
+.edlist li{display:grid;grid-template-columns:20px 64px minmax(0,1.6fr) minmax(0,1fr) auto auto minmax(0,1.4fr) auto;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.edlist li.drag{opacity:.4}.edlist li.over{box-shadow:0 -2px 0 var(--lime)}
+.edlist input:not([type]){background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--fg);font:inherit;font-size:13px;min-width:0}
+.edlist input.t{font-family:var(--mono)}
+.edlist .grip{cursor:grab;color:var(--muted);text-align:center;user-select:none}
+.edlist .ck{font-size:12px;color:var(--muted);white-space:nowrap;display:flex;gap:4px;align-items:center}
+.edlist .mv{display:flex;gap:4px}.edlist .mv button{border:1px solid var(--line);background:transparent;border-radius:6px;padding:4px 7px;font-size:12px;font-weight:700}
+.edstatus{padding:0 16px 14px;font-size:12px;color:var(--muted)}.edstatus.warn{color:var(--warn);font-weight:700}
+@media (max-width:900px){.edlist li{grid-template-columns:20px 64px minmax(0,1fr) auto;}.edlist li .c,.edlist li .d,.edlist li .ck{grid-column:2/-1}}
 .sub{padding:12px 16px 0;font-size:12px;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sub select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
 .board button.live{background:var(--crit);border-color:var(--crit);color:#fff}
@@ -146,7 +165,9 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
       <h3>Roteiro do dia <span>toque numa linha para marcar como "agora"</span></h3>
       <ol class="ros" id="ros"></ol>
     </div>
-    <div class="panel" id="boardPanel">
+    <details class="panel drawer" id="ensaio">
+      <summary>Controles do ensaio <span>datashow, áudios e ordem do roteiro</span></summary>
+    <div class="sec" id="boardPanel">
       <h3>Áudios do palco <span>tocam só neste computador</span></h3>
       <div class="board" id="board">
         <button data-play="aviso">Só o aviso sonoro</button>
@@ -155,7 +176,7 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
       </div>
       <div class="nowplaying" id="nowplaying"></div>
     </div>
-    <div class="panel" id="telaPanel">
+    <div class="sec" id="telaPanel">
       <h3>Datashow <span><a id="telaLink" href="tela.html" target="_blank" rel="noopener">abrir a tela do datashow ↗</a></span></h3>
       <div class="sub">Mix · alternam sozinhas, com transição. Clique para incluir ou tirar.</div>
       <div class="board" id="telaMix"></div>
@@ -167,6 +188,20 @@ form.send input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--l
       <div class="board"><button id="telaVolta" class="go" hidden>↺ Voltar ao mix</button></div>
       <div class="nowplaying" id="telaNow">No ar: só o fundo</div>
     </div>
+      <div class="sec" id="editor">
+        <h3>Editar roteiro <span>mude horário, ordem e textos; vale para os dois depois de salvar</span></h3>
+        <div class="sub">Arraste pela alça ⋮⋮ ou use ↑ ↓. Mudou o horário? Clique em "Ordenar por horário".</div>
+        <ol class="edlist" id="edList"></ol>
+        <div class="board">
+          <button id="edAdd">+ Nova deixa depois da atual</button>
+          <button id="edSort">Ordenar por horário</button>
+          <button id="edUndo">Descartar</button>
+          <button id="edOrig">Voltar ao roteiro original</button>
+          <button id="edSave" class="go">Salvar roteiro</button>
+        </div>
+        <div class="edstatus" id="edStatus"></div>
+      </div>
+    </details>
     </div>
     <div class="panel chat">
       <h3>Rádio Carlos e Felipe <span id="who"></span></h3>

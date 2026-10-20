@@ -17,6 +17,9 @@
         "tela": {
           ".validate": "newData.hasChildren(['ov','at']) && newData.child('ov').isString() && newData.child('ov').val().length <= 30 && newData.child('at').isNumber()"
         },
+        "ros": {
+          ".validate": "newData.hasChildren(['lista','at']) && newData.child('lista').isString() && newData.child('lista').val().length <= 30000"
+        },
         "$outro": {
           ".validate": false
         }
