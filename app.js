@@ -17,14 +17,14 @@ function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<
 function cueHTML(c, tag){
   if(!c) return `<span class="tag">${tag}</span><h2>Fim do roteiro</h2>`;
   return `<span class="tag">${tag} · ${esc(c.t)}</span><h2>${esc(c.n)}</h2>
-  <div class="chips"><span class="chip clip">Telão <b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio">Áudio <b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">ordem a confirmar</span>':''}</div>
+  <div class="chips">${c.video?'<span class="chip video">▶ VÍDEO</span>':''}<span class="chip clip">Telão <b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio">Áudio <b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">ordem a confirmar</span>':''}</div>
   ${c.d?`<p>${esc(c.d)}</p>`:''}
   ${c.narr && tag==='Agora'?`<div class="play"><button class="btn audio" data-play="${c.narr}">▶ Tocar aviso + narração</button><div class="bar"><i id="bar"></i></div></div>`:''}`;
 }
 function render(){
   $('#cueNow').innerHTML = cueHTML(ROS[cur], 'Agora');
   $('#cueNext').innerHTML = cueHTML(ROS[cur+1], 'Próximo');
-  $('#ros').innerHTML = ROS.map((c,i)=>`<li data-i="${i}" class="${i<cur?'done':''} ${i===cur?'cur':''}"><time>${esc(c.t)}</time><div><div class="t">${esc(c.n)}</div><div class="chips"><span class="chip clip"><b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio"><b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">a confirmar</span>':''}</div>${c.d?`<div class="d">${esc(c.d)}</div>`:''}</div></li>`).join('');
+  $('#ros').innerHTML = ROS.map((c,i)=>`<li data-i="${i}" class="${i<cur?'done':''} ${i===cur?'cur':''} ${c.video?'vid':''}"><time>${esc(c.t)}</time><div><div class="t">${esc(c.n)}</div><div class="chips">${c.video?'<span class="chip video">▶ VÍDEO</span>':''}<span class="chip clip"><b>${esc(c.clip)}</b></span>${c.audio?`<span class="chip audio"><b>${esc(c.audio)}</b></span>`:''}${c.tbc?'<span class="chip tbc">a confirmar</span>':''}</div>${c.d?`<div class="d">${esc(c.d)}</div>`:''}</div></li>`).join('');
   const li = document.querySelector('ol.ros li.cur'); if(li) li.scrollIntoView({block:'nearest'});
   document.querySelectorAll('.roles button').forEach(b => b.setAttribute('aria-pressed', String(b.id === 'r-'+role.toLowerCase())));
   $('#who').textContent = 'você é ' + role;
