@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f3b2e">
+<title>Credenciamento | Synvia Summit 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="cred.css">
+</head>
+<body>
+
+<!-- identificação do aparelho -->
+<div class="gate" id="gate" hidden>
+  <form class="gate-panel" id="gateForm" autocomplete="off" novalidate>
+    <p class="mark"><b>Synvia</b> Summit 2026</p>
+    <h1>Credenciamento</h1>
+    <p class="gate-text" id="gText">Informe seu nome para começar. Ele fica salvo neste aparelho e aparece em cada credenciamento que você fizer.</p>
+    <p class="gate-text" id="gNoLink" hidden>Abra esta página pelo link de credenciamento enviado à equipe. Depois do primeiro acesso, o aparelho fica liberado.</p>
+    <div class="gate-fields" id="gFields">
+      <label class="field"><span>Nome</span><input id="gFirst" autocapitalize="words" autocomplete="given-name" maxlength="40" required></label>
+      <label class="field"><span>Sobrenome</span><input id="gLast" autocapitalize="words" autocomplete="family-name" maxlength="40" required></label>
+    </div>
+    <p class="form-error" id="gErr" role="alert" hidden></p>
+    <button class="btn primary large block" type="submit" id="gGo">Entrar</button>
+  </form>
+</div>
+
+<div class="shell" id="app" hidden>
+  <header class="bar">
+    <div class="bar-in">
+      <div class="bar-brand">
+        <p class="mark"><b>Synvia</b> Summit 2026</p>
+        <span class="bar-sep" aria-hidden="true"></span>
+        <h1 class="bar-title">Credenciamento</h1>
+      </div>
+      <div class="bar-right">
+        <span class="live" id="live"><i aria-hidden="true"></i><span>Conectando</span></span>
+        <div class="user">
+          <button class="user-btn" id="userBtn" aria-haspopup="menu" aria-expanded="false">
+            <span class="avatar" id="userAv"></span><span class="user-name" id="userName"></span>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="menu" id="menu" role="menu" hidden>
+            <p class="menu-head" id="menuHead"></p>
+            <button role="menuitem" data-act="team">Equipe e contagem por pessoa</button>
+            <button role="menuitem" data-act="export">Baixar lista de credenciados</button>
+            <button role="menuitem" data-act="logout">Trocar usuário neste aparelho</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress" aria-live="polite">
+    <div class="wrap progress-in">
+      <p><strong id="pIn">0</strong> de <span id="pTot">0</span> credenciados</p>
+      <p class="progress-pct" id="pPct">0%</p>
+    </div>
+    <div class="progress-track"><i id="pBar"></i></div>
+  </div>
+
+  <div class="notice warn" id="offline" hidden>Sem conexão. O credenciamento volta a funcionar quando a internet voltar.</div>
+  <div class="notice demo" id="demo" hidden>Modo de treino. Os dados são fictícios e ficam só neste navegador.</div>
+
+  <main class="wrap main">
+    <section class="col-list" aria-label="Participantes">
+      <div class="tools">
+        <div class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+          <input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Nome ou empresa" aria-label="Buscar participante" aria-controls="list">
+          <button class="search-clear" id="qClear" type="button" aria-label="Limpar busca" hidden><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+        </div>
+        <button class="btn outline add" id="addBtn" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg><span>Novo participante</span></button>
+      </div>
+
+      <div class="tabs-row">
+        <div class="tabs" role="tablist" aria-label="Filtrar lista">
+          <button role="tab" data-f="all" aria-selected="true">Todos <span id="cAll">0</span></button>
+          <button role="tab" data-f="pend" aria-selected="false">Faltam <span id="cPend">0</span></button>
+          <button role="tab" data-f="in" aria-selected="false">Credenciados <span id="cIn">0</span></button>
+        </div>
+        <p class="kbd-hint">Use <kbd>↑</kbd> <kbd>↓</kbd> para escolher e <kbd>Enter</kbd> para credenciar</p>
+      </div>
+
+      <div class="panel">
+        <ul class="list" id="list" aria-label="Participantes"></ul>
+        <div class="empty" id="empty" hidden></div>
+      </div>
+    </section>
+
+    <aside class="col-side" aria-label="Últimos credenciamentos">
+      <h2>Últimos credenciamentos</h2>
+      <ol class="feed" id="feed"></ol>
+    </aside>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dTitle" hidden>
+  <button class="dialog-close" id="dClose" type="button" aria-label="Fechar"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  <div id="dBody"></div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="../config.js"></script>
+<script type="module" src="cred.js"></script>
+</body>
+</html>
