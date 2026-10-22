@@ -211,7 +211,7 @@ async function credenciar(id, { doDialogo = false } = {}){
       store.log({ a: "in", id, by: me.dev, bn: fullName(), at: rec.at }).catch(() => {});
       flash.add(id); setTimeout(() => flash.delete(id), 1500);
       if (doDialogo) fecharDialogo();
-      toast(`<b>${esc(p.n)}</b><small>Credenciamento confirmado às ${hora(rec.at)}</small>`, "", 8000, { label: "Desfazer", fn: () => desfazer(id) });
+      destaque(id, rec.at);
       limparBusca();
     } else {
       const x = r.existing || {};
@@ -222,6 +222,7 @@ async function credenciar(id, { doDialogo = false } = {}){
 }
 async function desfazer(id){
   if (!CI[id]) return;
+  if (spotId === id) fecharSpot();
   try {
     await store.undo(id);
     store.log({ a: "undo", id, by: me.dev, bn: fullName(), at: store.now() }).catch(() => {});
@@ -237,7 +238,7 @@ function limparBusca(){
 let dlg = null;
 function abrirDialogo(html, estado){
   dlg = estado || null;
-  $("#toast").hidden = true;
+  $("#toast").hidden = true; fecharSpot();
   $("#dBody").innerHTML = html;
   $("#dialog").hidden = false; $("#scrim").hidden = false;
   document.body.style.overflow = "hidden";
@@ -317,7 +318,8 @@ function abrirNovo(){
       store.log({ a: "add", id, by: me.dev, bn: fullName(), at: now }).catch(() => {});
       fecharDialogo(); limparBusca();
       flash.add(id); setTimeout(() => flash.delete(id), 1500);
-      toast(`<b>${esc(n)}</b><small>${f.ci.checked ? "Cadastro e credenciamento confirmados" : "Cadastro confirmado"}</small>`, "", 6000);
+      if (f.ci.checked){ P[id] = P[id] || paths[`p/${id}`]; destaque(id, now); }
+      else toast(`<b>${esc(n)}</b><small>Cadastro confirmado</small>`, "", 6000);
     } catch(err){ $("#nGo").disabled = false; toast(erroMsg(err), "err", 7000); }
   });
 }
@@ -401,6 +403,27 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape"){ if (!$("#dialog").hidden) fecharDialogo(); else if (!$("#menu").hidden) menu(false); }
   if (e.key === "/" && $("#dialog").hidden && !/input|textarea/i.test(document.activeElement.tagName) && !$("#app").hidden){ e.preventDefault(); $("#q").focus(); }
 });
+
+/* ---------- destaque ---------- */
+// Fica 12 s na tela (pausa com o mouse em cima) para dar tempo de ler o nome e entregar a etiqueta.
+let spotT = null, spotId = null, spotLeft = 0, spotStart = 0;
+function destaque(id, at){
+  const p = P[id]; if (!p) return;
+  const el = $("#spot"); spotId = id; $("#toast").hidden = true;
+  const meta = [p.e, p.c].filter(Boolean).join(", ");
+  el.innerHTML = `<div class="spot-in"><span class="spot-ic">${ICON_CHECK}</span>
+    <div><p class="spot-k">Credenciado às ${hora(at)}</p><p class="spot-n">${esc(p.n)}</p>${meta ? `<p class="spot-m">${esc(meta)}</p>` : ""}</div>
+    <div class="spot-acts"><button class="btn outline" type="button" data-spot="undo">Desfazer</button><button class="btn quiet" type="button" data-spot="close">Fechar</button></div></div>
+    <div class="spot-bar"><i style="animation:drain 12s linear forwards"></i></div>`;
+  el.hidden = false;
+  el.querySelector('[data-spot="undo"]').onclick = () => { fecharSpot(); desfazer(id); };
+  el.querySelector('[data-spot="close"]').onclick = fecharSpot;
+  spotLeft = 12000; spotStart = Date.now();
+  clearTimeout(spotT); spotT = setTimeout(fecharSpot, spotLeft);
+}
+function fecharSpot(){ clearTimeout(spotT); $("#spot").hidden = true; spotId = null; }
+$("#spot").addEventListener("mouseenter", () => { clearTimeout(spotT); spotLeft -= Date.now() - spotStart; });
+$("#spot").addEventListener("mouseleave", () => { spotStart = Date.now(); clearTimeout(spotT); spotT = setTimeout(fecharSpot, Math.max(spotLeft, 1500)); });
 
 /* ---------- aviso ---------- */
 let toastT = null;

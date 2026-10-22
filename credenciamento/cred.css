@@ -203,6 +203,21 @@ mark{background:#e4f0cf;color:inherit;border-radius:2px}
 .toast button:hover{background:rgba(255,255,255,.24)}
 @keyframes toast{from{opacity:0;transform:translate(-50%,8px)}}
 
+/* destaque de quem acabou de ser credenciado */
+.spot{position:fixed;z-index:59;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(620px,calc(100% - 24px));background:var(--panel);border:2px solid var(--leaf);border-radius:16px;box-shadow:0 24px 60px rgba(10,30,22,.28);overflow:hidden;animation:toast .25s ease-out}
+.spot-in{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:16px;align-items:center;padding:18px 18px 18px 20px}
+.spot-ic{width:52px;height:52px;border-radius:50%;background:var(--leaf);display:grid;place-items:center}
+.spot-ic svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.spot-k{margin:0;font-size:13px;font-weight:600;color:var(--leaf-ink)}
+.spot-n{margin:2px 0 2px;font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.spot-m{margin:0;font-size:15px;color:var(--muted)}
+.spot-acts{display:flex;flex-direction:column;gap:8px;align-self:stretch;justify-content:center}
+.spot-acts .btn{min-height:40px;font-size:14px;padding:0 14px}
+.spot-bar{height:4px;background:var(--done)}
+.spot-bar i{display:block;height:100%;background:var(--leaf);width:100%}
+.spot:hover .spot-bar i{animation-play-state:paused!important}
+@keyframes drain{from{width:100%}to{width:0}}
+
 /* telas menores */
 @media (max-width:1020px){
   .main{grid-template-columns:1fr}
@@ -242,6 +257,11 @@ mark{background:#e4f0cf;color:inherit;border-radius:2px}
   .stamp{font-size:12px}
   .dialog{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92dvh;border-radius:18px 18px 0 0;padding:24px 18px max(20px,env(safe-area-inset-bottom));animation:sheet .22s ease-out}
   .gate-fields{grid-template-columns:1fr}
+  .spot-in{grid-template-columns:44px minmax(0,1fr);gap:12px;padding:16px}
+  .spot-ic{width:44px;height:44px}
+  .spot-n{font-size:22px}
+  .spot-acts{grid-column:1/-1;flex-direction:row}
+  .spot-acts .btn{flex:1}
   .facts{grid-template-columns:110px 1fr}
 }
 @keyframes sheet{from{transform:translateY(30px);opacity:0}}
