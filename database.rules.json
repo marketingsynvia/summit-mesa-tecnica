@@ -42,6 +42,38 @@
           ".validate": false
         }
       }
+    },
+    "cred": {
+      "$sala": {
+        ".read": "$sala.length >= 16",
+        "p": {
+          "$id": {
+            ".write": "$sala.length >= 16 && newData.exists()",
+            ".validate": "newData.hasChildren(['n']) && newData.child('n').isString() && newData.child('n').val().length <= 200"
+          }
+        },
+        "ci": {
+          "$id": {
+            ".write": "$sala.length >= 16 && (!data.exists() || !newData.exists())",
+            ".validate": "newData.hasChildren(['at','by','bn']) && newData.child('at').isNumber() && newData.child('bn').isString() && newData.child('bn').val().length <= 80 && newData.parent().parent().child('p').child($id).exists()"
+          }
+        },
+        "staff": {
+          "$dev": {
+            ".write": "$sala.length >= 16",
+            ".validate": "newData.hasChildren(['n']) && newData.child('n').isString() && newData.child('n').val().length <= 80"
+          }
+        },
+        "log": {
+          "$k": {
+            ".write": "$sala.length >= 16 && !data.exists()",
+            ".validate": "newData.hasChildren(['a','at'])"
+          }
+        },
+        "$outro": {
+          ".validate": false
+        }
+      }
     }
   }
 }
